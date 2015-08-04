@@ -10,7 +10,43 @@
 
 #define EMOJI_JSON_PATH [[NSBundle mainBundle] pathForResource:@"emoji" ofType:@"json"]
 
+#define MAX_RECENT_EMOJI_COUNT 5
+static NSString *kPrefsKeyEmojiRecent = @"prefsKeyEmojiRecent";
+
 @implementation STEmoji
+@end
+
+@implementation STEmojiRecent
+
++ (void)addRecentEmoji:(NSString *)emoji
+{
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSMutableArray *recent = [[prefs arrayForKey:kPrefsKeyEmojiRecent] mutableCopy];
+    recent = (recent) ?: [@[] mutableCopy];
+    [recent removeObject:emoji];
+    while (recent.count >= MAX_RECENT_EMOJI_COUNT) {
+        [recent removeLastObject];
+    }
+    [recent insertObject:emoji atIndex:0];
+    [prefs setObject:recent forKey:kPrefsKeyEmojiRecent];
+    // TODO(TIM): should we synchronize?
+}
+
+- (NSString *)icon
+{
+    return @"🕒";
+}
+
+- (NSString *)title
+{
+    return @"RECENT";
+}
+
+- (NSArray *)emojis
+{
+    return [[NSUserDefaults standardUserDefaults] objectForKey:kPrefsKeyEmojiRecent];
+}
+
 @end
 
 static STEmojiStore *__emojiStoreInstance = nil;
@@ -47,6 +83,7 @@ static STEmojiStore *__emojiStoreInstance = nil;
 - (NSArray *)buildEmojiSectionsWithJSONObject:(NSArray *)emojiJSON
 {
     NSMutableArray *emojiList = [NSMutableArray new];
+    [emojiList addObject:[STEmojiRecent new]];
     for (NSDictionary *section in emojiJSON) {
         STEmoji *emoji = [STEmoji new];
         emoji.title = [section[@"title"] uppercaseString];

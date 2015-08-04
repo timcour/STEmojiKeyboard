@@ -51,6 +51,14 @@
     return nextButton;
 }
 
+- (void)reloadData
+{
+    for (UIView *view in self.subviews) {
+        [view removeFromSuperview];
+    }
+    [self loadUI];
+}
+
 - (void)loadUI{
     self.backgroundColor = [UIColor clearColor];
     UIButton *(^getButton)(NSInteger, NSString *);
@@ -186,6 +194,12 @@
     return YES;
 }
 
+- (void)reloadData
+{
+    [self.toolBar reloadData];
+    [self.emojiPageView reloadData];
+}
+
 - (void)loadUI{
     _emojiPageView = [[STEmojiCollectionView alloc] initWithFrame:self.bounds];
     _emojiPageView.emojiDelegate = self;
@@ -261,6 +275,8 @@
 
 - (void)emojiDidClicked:(NSString *)emoji{
     [self insertEmoji:emoji];
+    [STEmojiRecent addRecentEmoji:emoji];
+    [self reloadData];
 }
 
 - (void)didScrollToSection:(NSInteger)section{

@@ -9,11 +9,13 @@
 #import <Foundation/Foundation.h>
 
 @interface STEmoji : NSObject
-
 @property (strong, nonatomic) NSString *icon;
 @property (strong, nonatomic) NSString *title;
 @property (strong, nonatomic) NSArray *emojis;
+@end
 
+@interface STEmojiRecent : STEmoji
++ (void)addRecentEmoji:(NSString *)recent;
 @end
 
 @interface STEmojiStore : NSObject
