@@ -51,6 +51,7 @@
     }];
     
     _names = @[@"小明",@"老师"];
+    [_inputBar.textView becomeFirstResponder];
 }
 
 - (void)updateMessage:(NSString *)message{

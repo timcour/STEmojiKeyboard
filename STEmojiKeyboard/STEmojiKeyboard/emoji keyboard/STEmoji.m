@@ -8,63 +8,65 @@
 
 #import "STEmoji.h"
 
+#define EMOJI_JSON_PATH [[NSBundle mainBundle] pathForResource:@"emoji" ofType:@"json"]
+
 @implementation STEmoji
 @end
 
-@implementation STEmoji (Generate)
+static STEmojiStore *__emojiStoreInstance = nil;
 
-+ (NSDictionary *)emojis{
-    static NSDictionary *__emojis = nil;
-    if (!__emojis){
-        NSString *path = [[NSBundle mainBundle] pathForResource:@"emoji" ofType:@"json"];
-        NSData *emojiData = [[NSData alloc] initWithContentsOfFile:path];
-        __emojis = [NSJSONSerialization JSONObjectWithData:emojiData options:NSJSONReadingAllowFragments error:nil];
+@implementation STEmojiStore {
+    NSArray *emojiStaticSections;
+}
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+
     }
-    return __emojis;
+    return self;
 }
 
-+ (instancetype)peopleEmoji{
-    STEmoji *emoji = [STEmoji new];
-    emoji.title = @"人物";
-    emoji.emojis = [self emojis][@"people"];
-    emoji.type = STEmojiTypePeople;
-    return emoji;
++ (instancetype)instance
+{
+    @synchronized (self) {
+        if (!__emojiStoreInstance) {
+            __emojiStoreInstance = [[self alloc] init];
+        }
+    }
+    return __emojiStoreInstance;
 }
 
-+ (instancetype)flowerEmoji{
-    STEmoji *emoji = [STEmoji new];
-    emoji.title = @"自然";
-    emoji.emojis = [self emojis][@"flower"];
-    emoji.type = STEmojiTypeFlower;
-    return emoji;
+- (NSArray *)emojiJsonObjectFromPath:(NSString *)path
+{
+    NSData *emojiData = [[NSData alloc] initWithContentsOfFile:path];
+    return [NSJSONSerialization JSONObjectWithData:emojiData options:NSJSONReadingAllowFragments error:nil];
 }
 
-+ (instancetype)bellEmoji{
-    STEmoji *emoji = [STEmoji new];
-    emoji.title = @"日常";
-    emoji.emojis = [self emojis][@"bell"];
-    emoji.type = STEmojiTypeBell;
-    return emoji;
+- (NSArray *)buildEmojiSectionsWithJSONObject:(NSArray *)emojiJSON
+{
+    NSMutableArray *emojiList = [NSMutableArray new];
+    for (NSDictionary *section in emojiJSON) {
+        STEmoji *emoji = [STEmoji new];
+        emoji.title = [section[@"title"] uppercaseString];
+        emoji.icon = section[@"icon"];
+        emoji.emojis = section[@"characters"];
+        if (!emoji.icon) {
+            emoji.icon = (emoji.emojis.count) ? emoji.emojis[0] : @"";
+        }
+        [emojiList addObject:emoji];
+    }
+    return emojiList;
 }
 
-+ (instancetype)vehicleEmoji{
-    STEmoji *emoji = [STEmoji new];
-    emoji.title = @"建筑与交通";
-    emoji.emojis = [self emojis][@"vehicle"];
-    emoji.type = STEmojiTypeVehicle;
-    return emoji;
-}
+- (NSArray *)allEmojis {
 
-+ (instancetype)numberEmoji{
-    STEmoji *emoji = [STEmoji new];
-    emoji.title = @"符号";
-    emoji.emojis = [self emojis][@"number"];
-    emoji.type = STEmojiTypeNumber;
-    return emoji;
-}
-
-+ (NSArray *)allEmojis{
-    return @[[self peopleEmoji], [self flowerEmoji], [self bellEmoji], [self vehicleEmoji], [self numberEmoji]];
+    if (!emojiStaticSections) {
+        NSArray *emojiJSON = [self emojiJsonObjectFromPath:EMOJI_JSON_PATH];
+        emojiStaticSections = [self buildEmojiSectionsWithJSONObject:emojiJSON];
+    }
+    return emojiStaticSections;
 }
 
 @end

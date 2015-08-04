@@ -14,9 +14,9 @@
 #define kSTEmojiToolBarHeight 30
 
 @interface STEmojiToolBar : UIView
-@property (assign, nonatomic) STEmojiType showType;
+@property (assign, nonatomic) NSInteger showType;
 + (instancetype)toolBarWithEmojis:(NSArray *)emojis;
-@property (strong, nonatomic) void (^actionHandler)(STEmojiType);
+@property (strong, nonatomic) void (^actionHandler)(NSInteger);
 @property (strong, nonatomic) void (^deleteHandler)();
 @end
 
@@ -35,7 +35,7 @@
 - (instancetype)initWithFrame:(CGRect)frame{
     if (self = [super initWithFrame:CGRectMake(0, CGRectGetHeight(kSTEmojiKeyboardFrame)-kSTEmojiToolBarHeight, CGRectGetWidth(kSTEmojiKeyboardFrame), kSTEmojiToolBarHeight)]){
         _beginDelete = NO;
-        self.showType = STEmojiTypePeople;
+        self.showType = 1;
     }
     return self;
 }
@@ -46,8 +46,8 @@
     getButton = ^UIButton *(CGRect frame, NSInteger tag, NSString *title){
         UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
         button.tag = tag;
-        button.adjustsImageWhenHighlighted = NO;
-        button.tintColor = [UIColor colorWithRed:132/255.0 green:120/255.0 blue:158/255.0 alpha:0.8];
+        button.adjustsImageWhenHighlighted = YES;
+        //button.tintColor = [UIColor colorWithRed:132/255.0 green:120/255.0 blue:158/255.0 alpha:0.8];
         button.frame = frame;
         [button setTitle:title forState:UIControlStateNormal];
         button.titleLabel.adjustsFontSizeToFitWidth = YES;
@@ -56,13 +56,14 @@
         return button;
     };
     
-    CGFloat w = CGRectGetWidth(self.frame)/6;
+    CGFloat w = CGRectGetWidth(self.frame)/ (_emojis.count + 1);
     CGFloat h = CGRectGetHeight(self.frame);
     CGFloat left = 0;
-    for (STEmoji *emoji in _emojis){
+    for (NSInteger i=0; i<_emojis.count; i++){
+        STEmoji *emoji = _emojis[i];
         UIButton *emojiButton = getButton(CGRectMake(left, 0, w, h),
-                                          emoji.type,
-                                          emoji.title);
+                                          i,
+                                          emoji.icon);
         [self addSubview:emojiButton];
         left += w;
     }
@@ -80,7 +81,7 @@
 - (void)loadEmojis:(NSArray *)emojis{
     _emojis = emojis;
     [self loadUI];
-    self.showType = STEmojiTypePeople;
+    self.showType = 0;
 }
 
 - (void)emojiButtonTouchDown:(UIButton *)button{
@@ -114,7 +115,7 @@
     });
 }
 
-- (void)setShowType:(STEmojiType)showType{
+- (void)setShowType:(NSInteger)showType{
     _showType = showType;
     for (UIButton *button in self.subviews){
         button.selected = (button.tag == _showType);
@@ -153,7 +154,7 @@
     if (self = [super initWithFrame:kSTEmojiKeyboardFrame inputViewStyle:UIInputViewStyleKeyboard]){
         self.clipsToBounds = NO;
         _dataDidLoad = NO;
-        _emojiData = [STEmoji allEmojis];
+        _emojiData = [[STEmojiStore instance] allEmojis];
         [self loadUI];
     }
     return self;
@@ -170,7 +171,7 @@
     __weak typeof(self) ws = self;
     __weak typeof(_emojiPageView) wPageView = _emojiPageView;
     __weak typeof(_toolBar) wToolBar = _toolBar;
-    [_toolBar setActionHandler:^(STEmojiType showType) {
+    [_toolBar setActionHandler:^(NSInteger showType) {
         [wPageView showSection:showType];
         [wToolBar setShowType:showType];
     }];

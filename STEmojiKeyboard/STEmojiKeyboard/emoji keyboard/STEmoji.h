@@ -8,23 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSUInteger, STEmojiType) {
-    // emoji show type
-    STEmojiTypePeople = 0,
-    STEmojiTypeFlower,
-    STEmojiTypeBell,
-    STEmojiTypeVehicle,
-    STEmojiTypeNumber,
-};
-
 @interface STEmoji : NSObject
 
-@property (assign, nonatomic) STEmojiType type;
+@property (strong, nonatomic) NSString *icon;
 @property (strong, nonatomic) NSString *title;
 @property (strong, nonatomic) NSArray *emojis;
 
 @end
 
-@interface STEmoji (Generate)
-+ (NSArray *)allEmojis;
+@interface STEmojiStore : NSObject
++ (instancetype)instance;
+- (NSArray *)allEmojis;
 @end

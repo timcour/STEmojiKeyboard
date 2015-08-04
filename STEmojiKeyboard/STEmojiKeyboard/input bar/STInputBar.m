@@ -19,7 +19,6 @@
 @interface STInputBar () <UITextViewDelegate>
 
 @property (strong, nonatomic) UIButton *keyboardTypeButton;
-@property (strong, nonatomic) UITextView *textView;
 @property (strong, nonatomic) UIButton *sendButton;
 @property (strong, nonatomic) STEmojiKeyboard *keyboard;
 @property (strong, nonatomic) UILabel *placeHolderLabel;
@@ -205,7 +204,7 @@
     }
 }
 
-- (void)keyboardTypeButtonClicked:(UIButton *)button{
+- (void)keyboardTypeButtonClicked:(UIButton *)button {
     if (button.tag == 1){
         self.textView.inputView = nil;
     }

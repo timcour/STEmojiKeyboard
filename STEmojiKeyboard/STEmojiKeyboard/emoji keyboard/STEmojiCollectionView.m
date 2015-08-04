@@ -154,7 +154,7 @@
         
         UILabel *titleView = [UILabel new];
         titleView.textColor = [UIColor colorWithWhite:0.4 alpha:0.5];
-        titleView.font = [UIFont boldSystemFontOfSize:15];
+        titleView.font = [UIFont boldSystemFontOfSize:12];
         titleView.text = [_emojiDelegate titleForSection:section];
         [titleView sizeToFit];
         titleView.frame = CGRectMake(sectionLeft+_horizontalPadding, 0, CGRectGetWidth(titleView.frame), kSTEPTitleHeight);

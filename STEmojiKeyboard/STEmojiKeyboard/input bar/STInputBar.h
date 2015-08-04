@@ -13,6 +13,7 @@
 + (instancetype)inputBar;
 
 @property (assign, nonatomic) BOOL fitWhenKeyboardShowOrHide;
+@property (strong, nonatomic) UITextView *textView;
 
 - (void)setDidSendClicked:(void(^)(NSString *text))handler;
 
