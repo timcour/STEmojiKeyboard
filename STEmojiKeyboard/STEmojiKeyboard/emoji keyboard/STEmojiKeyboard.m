@@ -40,48 +40,70 @@
     return self;
 }
 
+- (UIButton *)createNextKeyboardButton
+{
+    UIButton *nextButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    nextButton.tintColor = [UIColor lightGrayColor];
+    [nextButton setTitle:@"ABC" forState:UIControlStateNormal];
+    nextButton.titleLabel.adjustsFontSizeToFitWidth = YES;
+    [nextButton addTarget:self action:@selector(nextKeyboardButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    nextButton.tag = 101;
+    return nextButton;
+}
+
 - (void)loadUI{
     self.backgroundColor = [UIColor clearColor];
-    UIButton *(^getButton)(CGRect, NSInteger, NSString *);
-    getButton = ^UIButton *(CGRect frame, NSInteger tag, NSString *title){
+    UIButton *(^getButton)(NSInteger, NSString *);
+    getButton = ^UIButton *(NSInteger tag, NSString *title){
         UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
         button.tag = tag;
         button.adjustsImageWhenHighlighted = YES;
         //button.tintColor = [UIColor colorWithRed:132/255.0 green:120/255.0 blue:158/255.0 alpha:0.8];
-        button.frame = frame;
         [button setTitle:title forState:UIControlStateNormal];
         button.titleLabel.adjustsFontSizeToFitWidth = YES;
         button.titleLabel.minimumScaleFactor = 0.8;
         [button addTarget:self action:@selector(emojiButtonTouchDown:) forControlEvents:UIControlEventTouchDown];
         return button;
     };
-    
-    CGFloat w = CGRectGetWidth(self.frame)/ (_emojis.count + 1);
-    CGFloat h = CGRectGetHeight(self.frame);
-    CGFloat left = 0;
+
+    NSMutableArray *buttonViews = [NSMutableArray new];
+    [buttonViews addObject:[self createNextKeyboardButton]];
+
     for (NSInteger i=0; i<_emojis.count; i++){
         STEmoji *emoji = _emojis[i];
-        UIButton *emojiButton = getButton(CGRectMake(left, 0, w, h),
-                                          i,
-                                          emoji.icon);
-        [self addSubview:emojiButton];
-        left += w;
+        UIButton *emojiButton = getButton(i, emoji.icon);
+        [buttonViews addObject:emojiButton];
     }
+
     UIButton *deleteButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    deleteButton.frame = CGRectMake(left, 0, w, h);
     deleteButton.tag = 100;
     deleteButton.tintColor = [UIColor whiteColor];
     [deleteButton setImage:[[UIImage imageNamed:@"keyboard_btn_delete"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]  forState:UIControlStateNormal];
     [deleteButton addTarget:self action:@selector(deleteButtonTouchDown) forControlEvents:UIControlEventTouchDown];
     [deleteButton addTarget:self action:@selector(deleteCancel) forControlEvents:UIControlEventTouchUpInside];
     [deleteButton addTarget:self action:@selector(deleteCancel) forControlEvents:UIControlEventTouchDragOutside];
-    [self addSubview:deleteButton];
+    [buttonViews addObject:deleteButton];
+
+    /* position and add subviews */
+    CGFloat w = CGRectGetWidth(self.frame)/ (buttonViews.count);
+    CGFloat h = CGRectGetHeight(self.frame);
+    CGFloat left = 0;
+    for (UIView *view in buttonViews) {
+        view.frame = CGRectMake(left, 0, w, h);
+        [self addSubview:view];
+        left += w;
+    }
 }
 
 - (void)loadEmojis:(NSArray *)emojis{
     _emojis = emojis;
     [self loadUI];
     self.showType = 0;
+}
+
+- (void)nextKeyboardButtonPressed:(id)sender
+{
+    NSLog(@"Next keyboard button pressed");
 }
 
 - (void)emojiButtonTouchDown:(UIButton *)button{
